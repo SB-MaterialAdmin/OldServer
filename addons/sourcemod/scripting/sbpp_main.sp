@@ -1020,7 +1020,7 @@ public GotDatabase(Handle:owner, Handle:hndl, const String:error[], any:data)
 
 		if (requireSiteLogin)
 			queryLastLogin = "lastvisit IS NOT NULL AND lastvisit != '' AND";
-		Format(queryLastLogin, sizeof(queryLastLogin), "%s (`expired` = 0 OR `expired` > CURRENT_TIMESTAMP() OR `expired` IS NULL) AND", queryLastLogin);
+		Format(queryLastLogin, sizeof(queryLastLogin), "%s (`expired` = 0 OR `expired` > %d OR `expired` IS NULL) AND", queryLastLogin, GetTime());
 
 		if (serverID == -1)
 		{
