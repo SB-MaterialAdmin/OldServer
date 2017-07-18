@@ -26,6 +26,7 @@
 - Настроить конфиги:
   - _/addons/sourcemod/configs/sourcebans/sourcebans.cfg_
   - _/addons/sourcemod/configs/sourcebans/sourcecomms.cfg_
+  - _/addons/sourcemod/configs/sourcebans/sourcesleuth\_whitelist.cfg_, если собираетесь использовать SourceSleuth (**sbpp\_sleuth**).
 
 ### О плагинах
 | Наименование плагина | Что делает? |
@@ -50,6 +51,8 @@
 |**sm\_ungag**|<#userid\|name> [reason]|**ADMFLAG\_CHAT**|Включение текстового чата|
 |**sm\_unmute**|<#userid\|name> [reason]|**ADMFLAG\_CHAT**|Включение голосового чата|
 |**sm\_unsilence**|<#userid\|name> [reason]|**ADMFLAG\_CHAT**|Включение всего чата|
+|-|-|-|-|
+|**sm\_listbans**|<#userid\|name>|**ADMFLAG\_RCON**|Вывести все баны указанного игрока в консоли|
 |-|-|-|-|
 |**sb\_reload**|-|**ADMFLAG\_RCON**|Перезагрузка конфигурации SourceBans.|
 
@@ -83,4 +86,4 @@
 |**sourcebans**|**native**|**SBBanPlayer** / **SourceBans\_BanPlayer**|int iClient, int iTarget, int iTime, char[] szReason|Выдача бана игроку. **Обратите внимание**: Функция **SBBanPlayer()** помечена как Deprecated. По возможности, используйте **SourceBans\_BanPlayer()**.|void|
 |**sourcebans**|**native**|**SBGetAdminExpire** / **SourceBans\_GetAdminExpire**|AdminId iAID|Возвращает время истечения админки игрока. Вернёт -1, если не найдено; 0 - перманент; любое другое число - timestamp. **Обратите внимание**: Функция **SBGetAdminExpire()** помечена как Deprecated. По возможности, используйте **SourceBans\_GetAdminExpire()**.|int|
 
-Функции SourceComms скоро будут добавлены...
+Функции SourceComms скоро будут добавлены в описание...

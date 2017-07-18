@@ -136,7 +136,7 @@ public Plugin:myinfo =
 	author = "SourceBans Development Team, SourceBans++ Dev Team",
 	description = "Advanced ban management for the Source engine",
 	version = SBR_VERSION,
-	url = "https://sbpp.github.io"
+	url = "https://github.com/SB-MaterialAdmin/OldServer/"
 };
 
 #if SOURCEMOD_V_MAJOR >= 1 && SOURCEMOD_V_MINOR >= 3
@@ -214,7 +214,7 @@ public OnPluginStart()
 			CloseHandle(ReasonMenuHandle);
 		if (HackingMenuHandle != INVALID_HANDLE)
 			CloseHandle(HackingMenuHandle);
-		LogToFile(logFile, "Database failure: Could not find Database conf \"sourcebans\". See FAQ: https://sbpp.sarabveer.me/faq/");
+		LogToFile(logFile, "Database failure: Could not find Database conf \"sourcebans\". See FAQ: https://github.com/SB-MaterialAdmin/Web/wiki/FAQ");
 		SetFailState("Database failure: Could not find Database conf \"sourcebans\"");
 		return;
 	}
@@ -977,7 +977,7 @@ public GotDatabase(Handle:owner, Handle:hndl, const String:error[], any:data)
 {
 	if (hndl == INVALID_HANDLE)
 	{
-		LogToFile(logFile, "Database failure: %s. See FAQ: https://sbpp.sarabveer.me/faq/", error);
+		LogToFile(logFile, "Database failure: %s. See FAQ: https://github.com/SB-MaterialAdmin/Web/wiki/FAQ", error);
 		g_bConnecting = false;
 
 		// Parse the overrides backup!

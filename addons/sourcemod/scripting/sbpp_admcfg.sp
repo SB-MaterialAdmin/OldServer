@@ -34,7 +34,7 @@ public Plugin:myinfo =
 	author = "AlliedModders LLC, Sarabveer(VEER™)", 
 	description = "Reads Admin Files", 
 	version = "1.6.2", 
-	url = "https://github.com/Sarabveer/SourceBans-Fork"
+	url = "https://github.com/SB-MaterialAdmin/OldServer/"
 };
 
 

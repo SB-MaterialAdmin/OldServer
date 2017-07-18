@@ -57,7 +57,7 @@ public Plugin:myinfo =
 	author = "ecca, SourceBans++ Dev Team",
 	description = "Useful for TF2 servers. Plugin will check for banned ips and ban the player.",
 	version = PLUGIN_VERSION,
-	url = "https://sbpp.github.io"
+	url = "https://github.com/SB-MaterialAdmin/OldServer/"
 };
 
 public OnPluginStart()
@@ -256,13 +256,13 @@ public LoadWhiteList()
 {
 	decl String:path[PLATFORM_MAX_PATH], String:line[256];
 
-	BuildPath(Path_SM, path, PLATFORM_MAX_PATH, "configs/sourcesleuth_whitelist.cfg");
+	BuildPath(Path_SM, path, PLATFORM_MAX_PATH, "configs/sourcebans/sourcesleuth_whitelist.cfg");
 
 	new Handle:fileHandle = OpenFile(path, "r");
 
 	if (fileHandle == INVALID_HANDLE)
 	{
-		LogError("Could not find the config file (addons/sourcemod/configs/sourcesleuth_whitelist.cfg)");
+		LogError("Could not find the config file (%s)", path);
 
 		return;
 	}

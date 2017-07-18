@@ -42,7 +42,7 @@ public Plugin:myinfo =
 	author = "psychonic, Ca$h Munny, SourceBans++ Dev Team",
 	description = "Notifies admins of prior bans from Sourcebans upon player connect.",
 	version = VERSION,
-	url = "https://sbpp.github.io"
+	url = "https://github.com/SB-MaterialAdmin/OldServer/"
 };
 
 public OnPluginStart()

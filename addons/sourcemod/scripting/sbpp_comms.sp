@@ -161,7 +161,7 @@ public Plugin:myinfo =
 	author = "Alex, SourceBans++ Dev Team",
 	description = "Advanced punishments management for the Source engine in SourceBans style",
 	version = PLUGIN_VERSION,
-	url = "https://sbpp.github.io"
+	url = "https://github.com/SB-MaterialAdmin/OldServer/"
 };
 
 public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
