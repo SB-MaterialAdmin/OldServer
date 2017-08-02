@@ -1242,7 +1242,7 @@ public Query_AddBlockInsert(Handle:owner, Handle:hndl, const String:error[], any
 	decl String:reason[256];
 
 	new iAdmin			= ReadPackCell(data);
-	iAdmin = iAdmin ? GetClientUserId(iAdmin) : 0;
+	iAdmin = iAdmin ? GetClientOfUserId(iAdmin) : 0;
 	if (!iAdmin) {
 		iAdmin = -1;
 	}
