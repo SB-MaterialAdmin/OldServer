@@ -945,10 +945,35 @@ stock DisplayBanTargetMenu(client)
 	SetMenuTitle(menu, title); // Set the title
 	SetMenuExitBackButton(menu, true); // Yes we want back/exit
 
+	new String:szName[MAX_TARGET_LENGTH];
+	new String:szUserID[16];
+
+	new iTarget = GetCurrentlySpectatingPlayer(client);
+	if (iTarget > 0) {
+		GetClientName(iTarget, szName, sizeof(szName));
+		IntToString(GetClientUserId(iTarget), szUserID, sizeof(szUserID));
+
+		AddMenuItem(menu, szUserID, szName, ITEMDRAW_DEFAULT);
+		AddMenuItem(menu, NULL_STRING, NULL_STRING, ITEMDRAW_SPACER);
+	}
+
+	for (new i = 1; i <= MaxClients; i++) {
+		if (iTarget == i || !IsClientConnected(i) || IsFakeClient(i) || !CanUserTarget(client, i)) {
+			continue;
+		}
+
+		GetClientName(i, szName, sizeof(szName));
+		IntToString(GetClientUserId(i), szUserID, sizeof(szUserID));
+
+		AddMenuItem(menu, szUserID, szName, ITEMDRAW_DEFAULT);
+	}
+
+	/**
 	AddTargetsToMenu(menu,  // Add clients to our menu
 		client,  // The client that called the display
 		false,  // We want to see people connecting
 		false); // And dead people
+	*/
 
 	DisplayMenu(menu, client, MENU_TIME_FOREVER); // Show the menu to the client FOREVER!
 }
@@ -2756,6 +2781,19 @@ stock bool:GetSID(iClient, String:szBuffer[], iLength) {
 #else
 	return GetClientAuthString(iClient, szBuffer, iLength);
 #endif
+}
+
+stock int GetCurrentlySpectatingPlayer(int iAdmin) {
+	new iSpecModeUser = GetEntProp(iAdmin, Prop_Send, "m_iObserverMode");
+	if (iSpecModeUser == 4 || iSpecModeUser == 5) {
+		new iTarget = GetEntPropEnt(iAdmin, Prop_Send, "m_hObserverTarget");
+
+		if (iTarget > 0 && iTarget <= MaxClients) {
+			return iTarget;
+		}
+	}
+
+	return -1;
 }
 
 //Yarr!
