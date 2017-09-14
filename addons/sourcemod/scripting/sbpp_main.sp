@@ -54,7 +54,8 @@ enum State/* ConfigState */
 	ConfigStateNone = 0,
 	ConfigStateConfig,
 	ConfigStateReasons,
-	ConfigStateHacking
+	ConfigStateHacking,
+	ConfigStateTime
 }
 
 new g_BanTarget[MAXPLAYERS + 1] =  { -1, ... };
@@ -96,6 +97,7 @@ new Handle:SQLiteDB;
 /* Menu file globals */
 new Handle:ReasonMenuHandle;
 new Handle:HackingMenuHandle;
+new Handle:BanTimeMenuHandle;
 
 /* Datapack and Timer handles */
 new Handle:PlayerRecheck[MAXPLAYERS + 1] =  { INVALID_HANDLE, ... };
@@ -201,6 +203,11 @@ public OnPluginStart()
 		SetMenuExitBackButton(HackingMenuHandle, true);
 	}
 
+	if ((BanTimeMenuHandle = CreateMenu(MenuHandler_BanTimeList, MenuAction_Select | MenuAction_Cancel | MenuAction_DrawItem)) != INVALID_HANDLE) {
+		SetMenuPagination(BanTimeMenuHandle, 8);
+		SetMenuExitBackButton(BanTimeMenuHandle, true);
+	}
+
 	g_FlagLetters = CreateFlagLetters();
 	g_AdminsExpired = CreateArray(2);
 
@@ -214,6 +221,9 @@ public OnPluginStart()
 			CloseHandle(ReasonMenuHandle);
 		if (HackingMenuHandle != INVALID_HANDLE)
 			CloseHandle(HackingMenuHandle);
+		if (BanTimeMenuHandle != INVALID_HANDLE)
+			CloseHandle(BanTimeMenuHandle);
+
 		LogToFile(logFile, "Database failure: Could not find Database conf \"sourcebans\". See FAQ: https://github.com/SB-MaterialAdmin/Web/wiki/FAQ");
 		SetFailState("Database failure: Could not find Database conf \"sourcebans\"");
 		return;
@@ -889,11 +899,6 @@ public MenuHandler_BanTimeList(Handle:menu, MenuAction:action, param1, param2)
 
 	switch (action)
 	{
-		case MenuAction_End:
-		{
-			CloseHandle(menu);
-		}
-
 		case MenuAction_Cancel:
 		{
 			if (param2 == MenuCancel_ExitBack && hTopMenu != INVALID_HANDLE)
@@ -912,7 +917,18 @@ public MenuHandler_BanTimeList(Handle:menu, MenuAction:action, param1, param2)
 			//DisplayBanReasonMenu(param1);
 			DisplayMenu(ReasonMenuHandle, param1, MENU_TIME_FOREVER);
 		}
+
+		case MenuAction_DrawItem: {
+			decl String:time[16];
+			GetMenuItem(menu, param2, time, sizeof(time));
+
+			return (StringToInt(time) > 0 ||
+					CheckCommandAccess(param1, "sm_unban", ADMFLAG_UNBAN | ADMFLAG_ROOT)
+					) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED;
+		}
 	}
+
+	return 0;
 }
 
 stock DisplayBanTargetMenu(client)
@@ -943,6 +959,8 @@ stock DisplayBanTimeMenu(client)
 	LogToFile(logFile, "DisplayBanTimeMenu()");
 	#endif
 
+	SetMenuTitle(BanTimeMenuHandle, "%T:\n ", "Ban player", client);
+	/**
 	new Handle:menu = CreateMenu(MenuHandler_BanTimeList);
 
 	decl String:title[100];
@@ -959,8 +977,9 @@ stock DisplayBanTimeMenu(client)
 	AddMenuItem(menu, "240", "4 Hours");
 	AddMenuItem(menu, "1440", "1 Day");
 	AddMenuItem(menu, "10080", "1 Week");
+	*/
 
-	DisplayMenu(menu, client, MENU_TIME_FOREVER);
+	DisplayMenu(BanTimeMenuHandle, client, MENU_TIME_FOREVER);
 }
 
 stock ResetMenu()
@@ -968,6 +987,14 @@ stock ResetMenu()
 	if (ReasonMenuHandle != INVALID_HANDLE)
 	{
 		RemoveAllMenuItems(ReasonMenuHandle);
+	}
+
+	if (HackingMenuHandle != INVALID_HANDLE) {
+		RemoveAllMenuItems(HackingMenuHandle);
+	}
+
+	if (BanTimeMenuHandle != INVALID_HANDLE) {
+		RemoveAllMenuItems(BanTimeMenuHandle);
 	}
 }
 
@@ -2139,6 +2166,8 @@ public SMCResult:ReadConfig_NewSection(Handle:smc, const String:name[], bool:opt
 			ConfigState = ConfigStateReasons;
 		} else if (strcmp("HackingReasons", name, false) == 0) {
 			ConfigState = ConfigStateHacking;
+		} else if (strcmp("BanTimes", name, false) == 0) {
+			ConfigState = ConfigStateTime;
 		}
 	}
 	return SMCParse_Continue;
@@ -2228,6 +2257,12 @@ public SMCResult:ReadConfig_KeyValue(Handle:smc, const String:key[], const Strin
 			if (HackingMenuHandle != INVALID_HANDLE)
 			{
 				AddMenuItem(HackingMenuHandle, key, value);
+			}
+		}
+
+		case ConfigStateTime: {
+			if (BanTimeMenuHandle != INVALID_HANDLE && StringToInt(key) > -1) {
+				AddMenuItem(BanTimeMenuHandle, value, key);
 			}
 		}
 	}
