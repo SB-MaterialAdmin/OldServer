@@ -175,4 +175,10 @@
 		"en"			"Expire after {1}"
 		"ru"			"Срок действия привелегий истекет через {1}"
 	}
+
+	"SB_SelectBanType"
+	{
+		"en"			"Select the ban type"
+		"ru"			"Выберите тип бана"
+	}
 }

@@ -60,6 +60,7 @@ enum State/* ConfigState */
 
 new g_BanTarget[MAXPLAYERS + 1] =  { -1, ... };
 new g_BanTime[MAXPLAYERS + 1] =  { -1, ... };
+new g_BanType[MAXPLAYERS + 1] =  { -1, ... };
 
 new State:ConfigState;
 new Handle:ConfigParser;
@@ -98,6 +99,7 @@ new Handle:SQLiteDB;
 new Handle:ReasonMenuHandle;
 new Handle:HackingMenuHandle;
 new Handle:BanTimeMenuHandle;
+new Handle:BanTypeMenuHandle;
 
 /* Datapack and Timer handles */
 new Handle:PlayerRecheck[MAXPLAYERS + 1] =  { INVALID_HANDLE, ... };
@@ -206,6 +208,13 @@ public OnPluginStart()
 	if ((BanTimeMenuHandle = CreateMenu(MenuHandler_BanTimeList, MenuAction_Select | MenuAction_Cancel | MenuAction_DrawItem)) != INVALID_HANDLE) {
 		SetMenuPagination(BanTimeMenuHandle, 8);
 		SetMenuExitBackButton(BanTimeMenuHandle, true);
+	}
+
+	if ((BanTypeMenuHandle = CreateMenu(MenuHandler_BanTypeList, MenuAction_Select | MenuAction_Cancel)) != INVALID_HANDLE) {
+		SetMenuExitBackButton(BanTypeMenuHandle, true);
+
+		AddMenuItem(BanTypeMenuHandle, "0", "SteamID", ITEMDRAW_DEFAULT);
+		AddMenuItem(BanTypeMenuHandle, "1", "IP", ITEMDRAW_DEFAULT);
 	}
 
 	g_FlagLetters = CreateFlagLetters();
@@ -885,8 +894,35 @@ public MenuHandler_BanPlayerList(Handle:menu, MenuAction:action, param1, param2)
 			else
 			{
 				g_BanTarget[param1] = target;
-				DisplayBanTimeMenu(param1);
+
+				SetMenuTitle(BanTypeMenuHandle, "%T:\n ", "SB_SelectBanType", param1);
+				DisplayMenu(BanTypeMenuHandle, param1, MENU_TIME_FOREVER);
 			}
+		}
+	}
+}
+
+public MenuHandler_BanTypeList(Handle:menu, MenuAction:action, param1, param2) {
+	#if defined DEBUG
+	LogToFile(logFile, "MenuHandler_BanTypeList()");
+	#endif
+
+	switch (action) {
+		case MenuAction_Cancel:	{
+			if (param2 == MenuCancel_ExitBack && hTopMenu != INVALID_HANDLE)
+			{
+				DisplayTopMenu(hTopMenu, param1, TopMenuPosition_LastCategory);
+			}
+		}
+
+		case MenuAction_Select:
+		{
+			decl String:info[4];
+
+			GetMenuItem(menu, param2, info, sizeof(info));
+			g_BanType[param1] = StringToInt(info);
+
+			DisplayBanTimeMenu(param1);
 		}
 	}
 }
@@ -2486,7 +2522,7 @@ public bool:CreateBan(client, target, time, String:reason[])
 		// if we have a valid reason pass move forward with the ban
 		if (DB != INVALID_HANDLE)
 		{
-			UTIL_InsertBan(time, name, auth, ip, reason, adminAuth, adminIp, dataPack);
+			UTIL_InsertBan(time, name, auth, ip, reason, adminAuth, adminIp, g_BanType[admin], dataPack);
 		} else {
 			UTIL_InsertTempBan(time, name, auth, ip, reason, adminAuth, adminIp, dataPack);
 		}
@@ -2507,7 +2543,7 @@ public bool:CreateBan(client, target, time, String:reason[])
 	return true;
 }
 
-stock UTIL_InsertBan(time, const String:Name[], const String:Authid[], const String:Ip[], const String:Reason[], const String:AdminAuthid[], const String:AdminIp[], Handle:Pack)
+stock UTIL_InsertBan(time, const String:Name[], const String:Authid[], const String:Ip[], const String:Reason[], const String:AdminAuthid[], const String:AdminIp[], iBanType, Handle:Pack)
 {
 	//new Handle:dummy;
 	//PruneBans(dummy);
@@ -2518,15 +2554,15 @@ stock UTIL_InsertBan(time, const String:Name[], const String:Authid[], const Str
 	SQL_EscapeString(DB, Reason, banReason, sizeof(banReason));
 	if (serverID == -1)
 	{
-		FormatEx(Query, sizeof(Query), "INSERT INTO %s_bans (ip, authid, name, created, ends, length, reason, aid, adminIp, sid, country) VALUES \
+		FormatEx(Query, sizeof(Query), "INSERT INTO %s_bans (ip, authid, name, created, ends, length, reason, aid, adminIp, sid, country, type) VALUES \
 						('%s', '%s', '%s', UNIX_TIMESTAMP(), UNIX_TIMESTAMP() + %d, %d, '%s', IFNULL((SELECT aid FROM %s_admins WHERE authid = '%s' OR authid REGEXP '^STEAM_[0-9]:%s$'),'0'), '%s', \
-						(SELECT sid FROM %s_servers WHERE ip = '%s' AND port = '%s' LIMIT 0,1), ' ')",
-			DatabasePrefix, Ip, Authid, banName, (time * 60), (time * 60), banReason, DatabasePrefix, AdminAuthid, AdminAuthid[8], AdminIp, DatabasePrefix, ServerIp, ServerPort);
+						(SELECT sid FROM %s_servers WHERE ip = '%s' AND port = '%s' LIMIT 0,1), ' ', '%d')",
+			DatabasePrefix, Ip, Authid, banName, (time * 60), (time * 60), banReason, DatabasePrefix, AdminAuthid, AdminAuthid[8], AdminIp, DatabasePrefix, ServerIp, ServerPort, iBanType);
 	} else {
-		FormatEx(Query, sizeof(Query), "INSERT INTO %s_bans (ip, authid, name, created, ends, length, reason, aid, adminIp, sid, country) VALUES \
+		FormatEx(Query, sizeof(Query), "INSERT INTO %s_bans (ip, authid, name, created, ends, length, reason, aid, adminIp, sid, country, type) VALUES \
 						('%s', '%s', '%s', UNIX_TIMESTAMP(), UNIX_TIMESTAMP() + %d, %d, '%s', IFNULL((SELECT aid FROM %s_admins WHERE authid = '%s' OR authid REGEXP '^STEAM_[0-9]:%s$'),'0'), '%s', \
-						%d, ' ')",
-			DatabasePrefix, Ip, Authid, banName, (time * 60), (time * 60), banReason, DatabasePrefix, AdminAuthid, AdminAuthid[8], AdminIp, serverID);
+						%d, ' ', '%d')",
+			DatabasePrefix, Ip, Authid, banName, (time * 60), (time * 60), banReason, DatabasePrefix, AdminAuthid, AdminAuthid[8], AdminIp, serverID, iBanType);
 	}
 
 	SQL_TQuery(DB, VerifyInsert, Query, Pack, DBPrio_High);
