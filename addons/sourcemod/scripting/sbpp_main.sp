@@ -112,6 +112,7 @@ new bool:PlayerStatus[MAXPLAYERS + 1];
 new CommandDisable;
 new bool:backupConfig = true;
 new bool:enableAdmins = true;
+new bool:g_SelectBanType = false;
 
 /* Require a lastvisited from SB site */
 new bool:requireSiteLogin = false;
@@ -895,8 +896,12 @@ public MenuHandler_BanPlayerList(Handle:menu, MenuAction:action, param1, param2)
 			{
 				g_BanTarget[param1] = target;
 
-				SetMenuTitle(BanTypeMenuHandle, "%T:\n ", "SB_SelectBanType", param1);
-				DisplayMenu(BanTypeMenuHandle, param1, MENU_TIME_FOREVER);
+				if (g_SelectBanType) {
+					SetMenuTitle(BanTypeMenuHandle, "%T:\n ", "SB_SelectBanType", param1);
+					DisplayMenu(BanTypeMenuHandle, param1, MENU_TIME_FOREVER);
+				} else {
+					DisplayBanTimeMenu(param1);
+				}
 			}
 		}
 	}
@@ -2303,6 +2308,10 @@ public SMCResult:ReadConfig_KeyValue(Handle:smc, const String:key[], const Strin
 			else if (strcmp("ServerID", key, false) == 0)
 			{
 				serverID = StringToInt(value);
+			}
+			else if (strcmp("EnableSelectingBanType", key, false) == 0)
+			{
+				g_SelectBanType = (value[0] == '1');
 			}
 		}
 
