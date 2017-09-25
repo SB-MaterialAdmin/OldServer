@@ -62,6 +62,8 @@ new g_BanTarget[MAXPLAYERS + 1] =  { -1, ... };
 new g_BanTime[MAXPLAYERS + 1] =  { -1, ... };
 new g_BanType[MAXPLAYERS + 1] =  { -1, ... };
 
+new g_IsOldCSS;
+
 new State:ConfigState;
 new Handle:ConfigParser;
 
@@ -160,6 +162,8 @@ public bool:AskPluginLoad(Handle:myself, bool:late, String:error[], err_max)
 	g_hFwd_OnBanAdded = CreateGlobalForward("SourceBans_OnBanPlayer", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_String);
 
 	LateLoaded = late;
+
+	g_IsOldCSS = (GetEngineVersion() == Engine_SourceSDK2006);
 
 	#if SOURCEMOD_V_MAJOR >= 1 && SOURCEMOD_V_MINOR >= 3
 	return APLRes_Success;
@@ -2830,7 +2834,8 @@ stock bool:GetSID(iClient, String:szBuffer[], iLength) {
 
 stock int GetCurrentlySpectatingPlayer(int iAdmin) {
 	new iSpecModeUser = GetEntProp(iAdmin, Prop_Send, "m_iObserverMode");
-	if (iSpecModeUser == 4 || iSpecModeUser == 5) {
+
+	if ((g_IsOldCSS && iSpecModeUser == 3) || iSpecModeUser == 4 || (!g_IsOldCSS && iSpecModeUser == 5)) {
 		new iTarget = GetEntPropEnt(iAdmin, Prop_Send, "m_hObserverTarget");
 
 		if (iTarget > 0 && iTarget <= MaxClients) {
