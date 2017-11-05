@@ -131,7 +131,8 @@ new bool:LateLoaded;
 new bool:AutoAdd;
 new bool:g_bConnecting = false;
 
-new serverID = -1;
+new serverID    = -1;
+new g_iCheckSID = 0;
 
 new Handle:g_hFwd_OnBanAdded;
 
@@ -343,11 +344,18 @@ public OnClientAuthorized(client, const String:auth[])
 		return;
 	}
 	
+	decl String:SubQuery[64];
+	switch (g_iCheckSID) {
+		case 0:	SubQuery[0] = 0;
+		case 1:	FormatEx(SubQuery, sizeof(SubQuery), " AND (b.sid = 0 OR b.sid = %d)", serverID);
+		case 2:	FormatEx(SubQuery, sizeof(SubQuery), " AND b.sid = %d", serverID);
+	}
+	
 	decl String:Query[512], String:ip[30];
 	GetClientIP(client, ip, sizeof(ip));
 	FormatEx(Query, sizeof(Query), "SELECT a.bid, a.length, a.created, a.reason, b.user FROM %s_bans a LEFT JOIN %s_admins b ON a.aid=b.aid \
 				WHERE ((a.type = 0 AND a.authid REGEXP '^STEAM_[0-9]:%s$') OR (a.type = 1 AND a.ip = '%s')) \
-				AND (a.length = '0' OR a.ends > UNIX_TIMESTAMP()) AND a.RemoveType IS NULL", DatabasePrefix, DatabasePrefix, auth[8], ip);
+				AND (a.length = '0' OR a.ends > UNIX_TIMESTAMP()) AND a.RemoveType IS NULL%s", DatabasePrefix, DatabasePrefix, auth[8], ip, SubQuery);
 	#if defined DEBUG
 	LogToFile(logFile, "Checking ban for: %s", auth);
 	#endif
@@ -2312,6 +2320,21 @@ public SMCResult:ReadConfig_KeyValue(Handle:smc, const String:key[], const Strin
 			else if (strcmp("ServerID", key, false) == 0)
 			{
 				serverID = StringToInt(value);
+			}
+			else if (strcmp("Check_SID", key, false) == 0)
+			{
+				g_iCheckSID = (value[0] - 48);
+
+				if (g_iCheckSID < 0 || g_iCheckSID > 2)
+				{
+					LogToFile(logFile, "Unknown Check SID param value: %s. Resetting to 0.", value);
+					g_iCheckSID = 0;
+				}
+
+				if (g_iCheckSID > 0 && serverID == -1)
+				{
+					LogToFile(logFile, "You MUST setup ServerID for correct working feature Check SID!");
+				}
 			}
 			else if (strcmp("EnableSelectingBanType", key, false) == 0)
 			{
