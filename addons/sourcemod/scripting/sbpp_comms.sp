@@ -1600,7 +1600,7 @@ public Query_ProcessQueue(Handle:owner, Handle:hndl, const String:error[], any:d
 		FormatEx(query, sizeof(query),
 			"INSERT INTO	 %s_comms (authid, name, created, ends, length, reason, aid, adminIp, sid, type) \
 				VALUES		 ('%s', '%s', %d, %d, %d, '%s', \
-								IFNULL((SELECT aid FROM %s_admins WHERE authid = '%s' OR authid REGEXP '^STEAM_[0-9]:%s$'), '0'), \
+								IFNULL((SELECT aid FROM %s_admins WHERE authid = '%s' OR authid REGEXP '^STEAM_[0-9]:%s$' LIMIT 1), '0'), \
 								'%s', %d, %d)",
 			DatabasePrefix, sAuthEscaped, banName, startTime, (startTime + (time * 60)), (time * 60), banReason, DatabasePrefix, sAdmAuthEscaped, sAdmAuthYZEscaped, adminIp, serverID, type);
 		#if defined LOG_QUERIES
@@ -2424,7 +2424,7 @@ stock ProcessUnBlock(client, targetId = 0, type, String:sReason[] = "", const St
 			decl String:query[4096];
 			Format(query, sizeof(query),
 				"SELECT		c.bid, \
-							IFNULL((SELECT aid FROM %s_admins WHERE authid = '%s' OR authid REGEXP '^STEAM_[0-9]:%s$'), '0') as iaid, \
+							IFNULL((SELECT aid FROM %s_admins WHERE authid = '%s' OR authid REGEXP '^STEAM_[0-9]:%s$' LIMIT 1), '0') as iaid, \
 							c.aid, \
 							IF (a.immunity>=g.immunity, a.immunity, IFNULL(g.immunity,0)) as immunity, \
 							c.type \
@@ -2946,7 +2946,7 @@ stock SavePunishment(admin = 0, target, type, length = -1, const String:reason[]
 
 		// bid	authid	name	created ends lenght reason aid adminip	sid	removedBy removedType removedon type ureason
 		FormatEx(sQueryAdm, sizeof(sQueryAdm),
-			"IFNULL((SELECT aid FROM %s_admins WHERE authid = '%s' OR authid REGEXP '^STEAM_[0-9]:%s$'), 0)",
+			"IFNULL((SELECT aid FROM %s_admins WHERE authid = '%s' OR authid REGEXP '^STEAM_[0-9]:%s$' LIMIT 1), 0)",
 			DatabasePrefix, sAdminAuthIdEscaped, sAdminAuthIdYZEscaped);
 
 		if (length >= 0)
