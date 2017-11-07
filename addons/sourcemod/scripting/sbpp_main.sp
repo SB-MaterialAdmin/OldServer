@@ -112,9 +112,10 @@ new bool:PlayerStatus[MAXPLAYERS + 1];
 
 /* Disable of addban and unban */
 new CommandDisable;
-new bool:backupConfig = true;
-new bool:enableAdmins = true;
-new bool:g_SelectBanType = false;
+new bool:backupConfig		= true;
+new bool:enableAdmins		= true;
+new bool:g_SelectBanType	= false;
+new bool:g_FloodControl		= false;
 
 /* Require a lastvisited from SB site */
 new bool:requireSiteLogin = false;
@@ -1600,7 +1601,7 @@ public AddedFromSQLiteCallback(Handle:owner, Handle:hndl, const String:error[], 
 		// They are added to main banlist, so remove the temp ban
 		RemoveBan(auth, BANFLAG_AUTHID);
 
-	} else {
+	} else if (g_FloodControl) {
 		// the insert failed so we leave the record in the queue and increase our temporary ban
 		FormatEx(buffer, sizeof(buffer), "banid %d %s", ProcessQueueTime, auth);
 		ServerCommand(buffer);
@@ -1656,7 +1657,10 @@ public VerifyBan(Handle:owner, Handle:hndl, const String:error[], any:userid)
 	GetClientName(client, clientName, sizeof(clientName));
 	if (SQL_FetchRow(hndl))
 	{
-		//ServerCommand("banid 5 %s", clientAuth);
+		if (g_FloodControl)
+		{
+			ServerCommand("banid 5 %s", clientAuth);
+		}
 		
 		decl String:reason[256], String:szLength[64], String:szCreated[128], String:buffer2[512];
 		new length = SQL_FetchInt(hndl, 1);
@@ -2307,15 +2311,15 @@ public SMCResult:ReadConfig_KeyValue(Handle:smc, const String:key[], const Strin
 			}
 			else if (strcmp("BackupConfigs", key, false) == 0)
 			{
-				backupConfig = StringToInt(value) == 1;
+				backupConfig = (value[0] != '0');
 			}
 			else if (strcmp("EnableAdmins", key, false) == 0)
 			{
-				enableAdmins = StringToInt(value) == 1;
+				enableAdmins = (value[0] != '0');
 			}
 			else if (strcmp("RequireSiteLogin", key, false) == 0)
 			{
-				requireSiteLogin = StringToInt(value) == 1;
+				requireSiteLogin = (value[0] != '0');
 			}
 			else if (strcmp("ServerID", key, false) == 0)
 			{
@@ -2338,7 +2342,11 @@ public SMCResult:ReadConfig_KeyValue(Handle:smc, const String:key[], const Strin
 			}
 			else if (strcmp("EnableSelectingBanType", key, false) == 0)
 			{
-				g_SelectBanType = (value[0] == '1');
+				g_SelectBanType = (value[0] != '0');
+			}
+			else if (strcmp("FloodControl", key, false) == 0)
+			{
+				g_FloodControl = (value[0] != '0');
 			}
 		}
 
@@ -2618,10 +2626,14 @@ stock UTIL_InsertTempBan(time, const String:name[], const String:auth[], const S
 	}
 	CloseHandle(dataPack);
 
-	// we add a temporary ban and then add the record into the queue to be processed when the database is available
-	decl String:buffer[50];
-	Format(buffer, sizeof(buffer), "banid %d %s", ProcessQueueTime, auth);
-	ServerCommand(buffer);
+	if (g_FloodControl)
+	{
+		// we add a temporary ban and then add the record into the queue to be processed when the database is available
+		decl String:buffer[50];
+		Format(buffer, sizeof(buffer), "banid %d %s", ProcessQueueTime, auth);
+		ServerCommand(buffer);
+	}
+
 	if (IsClientInGame(client))
 		KickClient(client, "%t", "Banned Check Site", WebsiteAddress);
 
