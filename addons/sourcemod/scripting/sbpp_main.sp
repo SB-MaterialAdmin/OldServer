@@ -355,10 +355,10 @@ public OnClientAuthorized(client, const String:auth[])
 	decl String:Query[512], String:ip[30];
 	GetClientIP(client, ip, sizeof(ip));
 	FormatEx(Query, sizeof(Query), "SELECT a.bid, a.length, a.created, a.reason, b.user FROM %s_bans a LEFT JOIN %s_admins b ON a.aid=b.aid \
-				WHERE ((a.type = 0 AND a.authid REGEXP '^STEAM_[0-9]:%s$') OR (a.type = 1 AND a.ip = '%s')) \
+				WHERE (((a.type = 0 OR a.type = -1) AND a.authid REGEXP '^STEAM_[0-9]:%s$') OR ((a.type = 1 OR a.type = -1) AND a.ip = '%s')) \
 				AND (a.length = '0' OR a.ends > UNIX_TIMESTAMP()) AND a.RemoveType IS NULL%s", DatabasePrefix, DatabasePrefix, auth[8], ip, SubQuery);
 	#if defined DEBUG
-	LogToFile(logFile, "Checking ban for: %s", auth);
+	LogToFile(logFile, "Checking ban for: %s, Query: %s", auth, Query);
 	#endif
 	
 	SQL_TQuery(DB, VerifyBan, Query, GetClientUserId(client), DBPrio_High);
@@ -2566,7 +2566,7 @@ public bool:CreateBan(client, target, time, String:reason[])
 		// if we have a valid reason pass move forward with the ban
 		if (DB != INVALID_HANDLE)
 		{
-			UTIL_InsertBan(time, name, auth, ip, reason, adminAuth, adminIp, g_BanType[admin], dataPack);
+			UTIL_InsertBan(time, name, auth, ip, reason, adminAuth, adminIp, dataPack, g_BanType[admin]);
 		} else {
 			UTIL_InsertTempBan(time, name, auth, ip, reason, adminAuth, adminIp, dataPack);
 		}
