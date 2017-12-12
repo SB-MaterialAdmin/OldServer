@@ -47,6 +47,8 @@
 
 #define FLAG_LETTERS_SIZE 26
 
+#define GMIC(%0)			GetMenuItemCount(%0)
+
 //#define DEBUG
 
 enum State/* ConfigState */
@@ -913,6 +915,7 @@ public MenuHandler_BanPlayerList(Handle:menu, MenuAction:action, param1, param2)
 					SetMenuTitle(BanTypeMenuHandle, "%T:\n ", "SB_SelectBanType", param1);
 					DisplayMenu(BanTypeMenuHandle, param1, MENU_TIME_FOREVER);
 				} else {
+					g_BanType[param1] = 0;
 					DisplayBanTimeMenu(param1);
 				}
 			}
@@ -2233,7 +2236,14 @@ static InternalReadConfig(const String:path[])
 	if (err != SMCError_Okay)
 	{
 		decl String:buffer[64];
-		PrintToServer("%s", SMC_GetErrorString(err, buffer, sizeof(buffer)) ? buffer : "Fatal parse error");
+		LogError("%s", SMC_GetErrorString(err, buffer, sizeof(buffer)) ? buffer : "Fatal parse error");
+	}
+
+	if (GMIC(BanTimeMenuHandle) == 0) {
+		AddMenuItem(BanTimeMenuHandle, "0",	"Permanent");
+		AddMenuItem(BanTimeMenuHandle, "10", "10 Minutes");
+		AddMenuItem(BanTimeMenuHandle, "60", "1 Hour");
+		AddMenuItem(BanTimeMenuHandle, "1440", "1 Day");
 	}
 }
 
@@ -2566,7 +2576,7 @@ public bool:CreateBan(client, target, time, String:reason[])
 		// if we have a valid reason pass move forward with the ban
 		if (DB != INVALID_HANDLE)
 		{
-			UTIL_InsertBan(time, name, auth, ip, reason, adminAuth, adminIp, dataPack, g_BanType[admin]);
+			UTIL_InsertBan(time, name, auth, ip, reason, adminAuth, adminIp, g_BanType[admin], dataPack);
 		} else {
 			UTIL_InsertTempBan(time, name, auth, ip, reason, adminAuth, adminIp, dataPack);
 		}
@@ -2609,6 +2619,9 @@ stock UTIL_InsertBan(time, const String:Name[], const String:Authid[], const Str
 			DatabasePrefix, Ip, Authid, banName, (time * 60), (time * 60), banReason, DatabasePrefix, AdminAuthid, AdminAuthid[8], AdminIp, serverID, iBanType);
 	}
 
+	#if defined DEBUG
+	LogToFile(logFile, "UTIL_InsertBan(): Query %s", Query);
+	#endif
 	SQL_TQuery(DB, VerifyInsert, Query, Pack, DBPrio_High);
 }
 
