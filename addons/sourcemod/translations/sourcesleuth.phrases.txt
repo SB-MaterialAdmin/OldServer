@@ -6,6 +6,7 @@
 		"en"		"Duplicate account"
 		"hu"		"Duplikált account"
 		"ru"		"Аккаунт дубликат"
+		"ua"		"Аккаунт дублікат"
 	}
 	
 	"sourcesleuth_admintext"
@@ -15,5 +16,6 @@
 		"hu"		"{1} (ID: {2} | IP: {3}) játékosnak van aktív kitiltása az alábbi IP-n"
 		"ru"		"Игрок {1} (ID: {2} | IP: {3}) имеет активный бан по IP"
 		"sv"		"Spelare {1} (ID: {2} | IP: {3}) har aktiva bannlysningar på IP"
+		"ua"		"Гравець {1} (ID: {2} | IP: {3}) має активний бан по IP"
 	}
 }
