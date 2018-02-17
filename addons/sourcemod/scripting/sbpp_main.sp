@@ -2880,7 +2880,7 @@ stock bool:GetSID(iClient, String:szBuffer[], iLength) {
 #endif
 }
 
-stock int GetCurrentlySpectatingPlayer(int iAdmin) {
+stock GetCurrentlySpectatingPlayer(iAdmin) {
 	new iSpecModeUser = GetEntProp(iAdmin, Prop_Send, "m_iObserverMode");
 
 	if ((g_IsOldCSS && iSpecModeUser == 3) || iSpecModeUser == 4 || (!g_IsOldCSS && iSpecModeUser == 5)) {
