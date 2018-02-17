@@ -136,6 +136,7 @@ new bool:g_bConnecting = false;
 
 new serverID    = -1;
 new g_iCheckSID = 0;
+new g_PermabanFlags = 0;
 
 new Handle:g_hFwd_OnBanAdded;
 
@@ -447,7 +448,7 @@ public Action:CommandBan(client, args)
 	// Get the ban time
 	GetCmdArg(2, buffer, sizeof(buffer));
 	new time = StringToInt(buffer);
-	if (!time && client && !(CheckCommandAccess(client, "sm_unban", ADMFLAG_UNBAN | ADMFLAG_ROOT)))
+	if (!time && client && !UTIL_IsHaveAccessToPermaban(client)))
 	{
 		ReplyToCommand(client, "You do not have Perm Ban Permission");
 		return Plugin_Handled;
@@ -531,7 +532,7 @@ public Action:CommandBanIp(client, args)
 
 	decl String:adminIp[24], String:adminAuth[64];
 	new minutes = StringToInt(time);
-	if (!minutes && client && !(CheckCommandAccess(client, "sm_unban", ADMFLAG_UNBAN | ADMFLAG_ROOT)))
+	if (!minutes && client && !UTIL_IsHaveAccessToPermaban(client)))
 	{
 		ReplyToCommand(client, "You do not have Perm Ban Permission");
 		return Plugin_Handled;
@@ -653,7 +654,7 @@ public Action:CommandAddBan(client, args)
 
 	decl String:adminIp[24], String:adminAuth[64];
 	new minutes = StringToInt(time);
-	if (!minutes && client && !(CheckCommandAccess(client, "sm_unban", ADMFLAG_UNBAN | ADMFLAG_ROOT)))
+	if (!minutes && client && !UTIL_IsHaveAccessToPermaban(client)))
 	{
 		ReplyToCommand(client, "You do not have Perm Ban Permission");
 		return Plugin_Handled;
@@ -980,7 +981,7 @@ public MenuHandler_BanTimeList(Handle:menu, MenuAction:action, param1, param2)
 			GetMenuItem(menu, param2, time, sizeof(time));
 
 			return (StringToInt(time) > 0 ||
-					CheckCommandAccess(param1, "sm_unban", ADMFLAG_UNBAN | ADMFLAG_ROOT)
+					UTIL_IsHaveAccessToPermaban(iClient)
 					) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED;
 		}
 	}
@@ -2358,6 +2359,10 @@ public SMCResult:ReadConfig_KeyValue(Handle:smc, const String:key[], const Strin
 			{
 				g_FloodControl = (value[0] != '0');
 			}
+			else if (strcmp("RequiredFlagsForPermaban", key, false) == 0)
+			{
+				g_PermabanFlags = ReadFlagString(value);
+			}
 		}
 
 		case ConfigStateReasons:
@@ -2894,4 +2899,9 @@ stock GetCurrentlySpectatingPlayer(iAdmin) {
 	return -1;
 }
 
+stock UTIL_IsHaveAccessToPermaban(iClient) {
+	// return (Get)
+	return (CheckCommandAccess(client, "sm_unban", ADMFLAG_UNBAN | ADMFLAG_ROOT)
+	    || (CheckCommandAccess(client, "sb_permaban", g_PermabanFlags);
+}
 //Yarr!
