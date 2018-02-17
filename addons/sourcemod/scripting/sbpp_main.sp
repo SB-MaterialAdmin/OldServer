@@ -448,7 +448,7 @@ public Action:CommandBan(client, args)
 	// Get the ban time
 	GetCmdArg(2, buffer, sizeof(buffer));
 	new time = StringToInt(buffer);
-	if (!time && client && !UTIL_IsHaveAccessToPermaban(client)))
+	if (!time && client && !UTIL_IsHaveAccessToPermaban(client))
 	{
 		ReplyToCommand(client, "You do not have Perm Ban Permission");
 		return Plugin_Handled;
@@ -532,7 +532,7 @@ public Action:CommandBanIp(client, args)
 
 	decl String:adminIp[24], String:adminAuth[64];
 	new minutes = StringToInt(time);
-	if (!minutes && client && !UTIL_IsHaveAccessToPermaban(client)))
+	if (!minutes && client && !UTIL_IsHaveAccessToPermaban(client))
 	{
 		ReplyToCommand(client, "You do not have Perm Ban Permission");
 		return Plugin_Handled;
@@ -654,7 +654,7 @@ public Action:CommandAddBan(client, args)
 
 	decl String:adminIp[24], String:adminAuth[64];
 	new minutes = StringToInt(time);
-	if (!minutes && client && !UTIL_IsHaveAccessToPermaban(client)))
+	if (!minutes && client && !UTIL_IsHaveAccessToPermaban(client))
 	{
 		ReplyToCommand(client, "You do not have Perm Ban Permission");
 		return Plugin_Handled;
