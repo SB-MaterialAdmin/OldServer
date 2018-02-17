@@ -981,7 +981,7 @@ public MenuHandler_BanTimeList(Handle:menu, MenuAction:action, param1, param2)
 			GetMenuItem(menu, param2, time, sizeof(time));
 
 			return (StringToInt(time) > 0 ||
-					UTIL_IsHaveAccessToPermaban(iClient)
+					UTIL_IsHaveAccessToPermaban(param1)
 					) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED;
 		}
 	}
@@ -2901,7 +2901,7 @@ stock GetCurrentlySpectatingPlayer(iAdmin) {
 
 stock UTIL_IsHaveAccessToPermaban(iClient) {
 	// return (Get)
-	return (CheckCommandAccess(client, "sm_unban", ADMFLAG_UNBAN | ADMFLAG_ROOT)
-	    || (CheckCommandAccess(client, "sb_permaban", g_PermabanFlags);
+	return (CheckCommandAccess(iClient, "sm_unban", ADMFLAG_UNBAN | ADMFLAG_ROOT)
+	    || CheckCommandAccess(iClient, "sb_permaban", g_PermabanFlags));
 }
 //Yarr!
