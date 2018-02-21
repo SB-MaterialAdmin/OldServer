@@ -351,8 +351,8 @@ public OnClientAuthorized(client, const String:auth[])
 	decl String:SubQuery[64];
 	switch (g_iCheckSID) {
 		case 0:	SubQuery[0] = 0;
-		case 1:	FormatEx(SubQuery, sizeof(SubQuery), " AND (b.sid = 0 OR b.sid = %d)", serverID);
-		case 2:	FormatEx(SubQuery, sizeof(SubQuery), " AND b.sid = %d", serverID);
+		case 1:	FormatEx(SubQuery, sizeof(SubQuery), " AND (a.sid = 0 OR a.sid = %d)", serverID);
+		case 2:	FormatEx(SubQuery, sizeof(SubQuery), " AND a.sid = %d", serverID);
 	}
 	
 	decl String:Query[512], String:ip[30];
