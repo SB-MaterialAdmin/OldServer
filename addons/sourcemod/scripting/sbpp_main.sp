@@ -1795,11 +1795,13 @@ public AdminsDone(Handle:owner, Handle:hndl, const String:error[], any:data)
 			KvRewind(adminsKV);
 		}
 
+		// add expire
+		AddAdminExpire(identity, Expire);
+
 		// find or create the admin using that identity
 		if ((curAdm = FindAdminByIdentity(authType, identity)) == INVALID_ADMIN_ID)
 		{
 			curAdm = CreateAdmin(name);
-			AddAdminExpire(curAdm, Expire);
 			// That should never happen!
 			if (!BindAdminIdentity(curAdm, authType, identity))
 			{
@@ -2435,11 +2437,23 @@ public Native_SBBanPlayer(Handle:plugin, numParams)
 }
 
 // ADMIN EXPIRE 
-GetAdminExpire(AdminId:admin)
+GetAdminExpire(iClient)
 {
-	new idx = FindValueInArray(g_AdminsExpired, admin);
-	if(idx != -1)
-		return GetArrayCell(g_AdminsExpired, idx, 1);
+	new length = GetArraySize(g_AdminsExpired);
+	decl String:szSteamID[32];
+	decl String:szIterableSID[32];
+	decl Handle:hPack;
+
+	GetSID(iClient, szSteamID, sizeof(szSteamID));
+	for (new i; i < length; ++i) {
+		hPack = GetArrayCell(g_AdminsExpired, i);
+		ResetPack(hPack);
+		ReadPackString(hPack, szIterableSID, sizeof(szIterableSID));
+
+		if (strcmp(szSteamID[8], szIterableSID[8], false) == 0) {
+			return ReadPackCell(hPack);
+		}
+	}
 	
 	return -1;
 }
@@ -2449,7 +2463,8 @@ public OnClientPostAdminCheck(client)
 	new AdminId:admin = GetUserAdmin(client);
 	if(admin != INVALID_ADMIN_ID)
 	{
-		new expire = GetAdminExpire(admin);
+		new expire = GetAdminExpire(client);
+		LogMessage("GetAdminExpire(): User %L, result %d", client, expire);
 		if(expire == -1)
 			return;
 		
@@ -2492,20 +2507,28 @@ public Action:Timer_Notify(Handle:timer, Handle:hPack)
 	return Plugin_Stop;
 }
 
-AddAdminExpire(AdminId:admin, expire)
+AddAdminExpire(const String:szSteamID[], expire)
 {
-	new idx = PushArrayCell(g_AdminsExpired, admin);
-	SetArrayCell(g_AdminsExpired, idx, expire, 1);
+	new Handle:hPack = CreateDataPack();
+	WritePackString(hPack, szSteamID);
+	WritePackCell(hPack, expire);
+	PushArrayCell(g_AdminsExpired, hPack);
 }
 
 ClearAdminExpire()
 {
+	new length = GetArraySize(g_AdminsExpired);
+	for (new i; i < length; ++i)
+		CloseHandle(Handle:GetArrayCell(g_AdminsExpired, i));
 	ClearArray(g_AdminsExpired);
 }
 
 public Native_GetAdminExpire(Handle:plugin, numParams)
 {
-	new AdminId:admin = GetNativeCell(1);
+	new admin = GetNativeCell(1);
+	if (admin < 1 || admin > MaxClients || !IsClientInGame(admin)) {
+		return ThrowNativeError(SP_ERROR_NATIVE, "Client ID %d is invalid", admin);
+	}
 	return GetAdminExpire(admin);
 }
 

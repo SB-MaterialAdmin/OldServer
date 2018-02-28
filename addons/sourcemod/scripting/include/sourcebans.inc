@@ -78,19 +78,19 @@ native SourceBans_BanPlayer(client, target, time, String:reason[]);
 /*********************************************************
  * Get Admin expire time
  *
- * @param admin		The admin id of client
+ * @param admin		The Client ID
  * @return integer value. -1 = not found, 0 - infinity, other - timespamp
  *********************************************************/
 #pragma deprecated Use SourceBans_GetAdminExpire() instead.
-native SBGetAdminExpire(AdminId:admin);
+native SBGetAdminExpire(admin);
 
 /*********************************************************
  * Get Admin expire time
  *
- * @param admin		The admin id of client
+ * @param admin		The Client ID
  * @return integer value. -1 = not found, 0 - infinity, other - timespamp
  *********************************************************/
-native SourceBans_GetAdminExpire(AdminId:admin);
+native SourceBans_GetAdminExpire(admin);
 
 /*********************************************************
  * Called when the admin banning the player.

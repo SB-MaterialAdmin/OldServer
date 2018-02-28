@@ -84,6 +84,6 @@
 |:----------:|:-:|--------|---------|--------|:-------------:|
 |**sourcebans**|**forward**|**SourceBans\_OnBanPlayer**|int iClient, int iTarget, int iTime, char szReason[]|Событие, вызывается при выдаче бана игроку. **iClient** - Администратор, выдающий бан; **iTarget** - игрок, который получает бан; **iTime** - время бана, в минутах (0 - перманент); **szReason** - причина.|void|
 |**sourcebans**|**native**|**SBBanPlayer** / **SourceBans\_BanPlayer**|int iClient, int iTarget, int iTime, char[] szReason|Выдача бана игроку. **Обратите внимание**: Функция **SBBanPlayer()** помечена как Deprecated. По возможности, используйте **SourceBans\_BanPlayer()**.|void|
-|**sourcebans**|**native**|**SBGetAdminExpire** / **SourceBans\_GetAdminExpire**|AdminId iAID|Возвращает время истечения админки игрока. Вернёт -1, если не найдено; 0 - перманент; любое другое число - timestamp. **Обратите внимание**: Функция **SBGetAdminExpire()** помечена как Deprecated. По возможности, используйте **SourceBans\_GetAdminExpire()**.|int|
+|**sourcebans**|**native**|**SBGetAdminExpire** / **SourceBans\_GetAdminExpire**|int iClient|Возвращает время истечения админки игрока. Вернёт -1, если не найдено; 0 - перманент; любое другое число - timestamp. **Обратите внимание**: Функция **SBGetAdminExpire()** помечена как Deprecated. По возможности, используйте **SourceBans\_GetAdminExpire()**.|int|
 
 Функции SourceComms скоро будут добавлены в описание...
