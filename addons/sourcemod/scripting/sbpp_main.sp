@@ -480,7 +480,7 @@ public Action:CommandBan(client, args)
 		return Plugin_Handled;
 	}
 
-
+	g_BanType[client] = 0;
 	CreateBan(client, target, time, reason);
 	return Plugin_Handled;
 }
