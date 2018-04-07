@@ -64,7 +64,8 @@ new g_BanTarget[MAXPLAYERS + 1] =  { -1, ... };
 new g_BanTime[MAXPLAYERS + 1] =  { -1, ... };
 new g_BanType[MAXPLAYERS + 1] =  { -1, ... };
 
-new g_IsOldCSS;
+new bool:g_IsOldCSS;
+new bool:g_bUpdateAdminNames;
 
 new State:ConfigState;
 new Handle:ConfigParser;
@@ -347,7 +348,8 @@ public OnClientAuthorized(client, const String:auth[])
 		PlayerStatus[client] = true;
 		return;
 	}
-	
+
+	// find ban.
 	decl String:SubQuery[64];
 	switch (g_iCheckSID) {
 		case 0:	SubQuery[0] = 0;
@@ -365,6 +367,22 @@ public OnClientAuthorized(client, const String:auth[])
 	#endif
 	
 	SQL_TQuery(DB, VerifyBan, Query, GetClientUserId(client), DBPrio_High);
+
+	// update admin name, if required.
+	if (!g_bUpdateAdminNames)
+		return;
+
+	decl String:Username[32];
+	decl String:EscapedUsername[64];
+	GetClientName(client, Username, sizeof(Username));
+	SQL_EscapeString(DB, Username, EscapedUsername, sizeof(EscapedUsername));
+	FormatEx(Query, sizeof(Query), "UPDATE `%s_admins` SET `user` = '%s' WHERE `authid` = '%s' OR `authid` REGEXP '^STEAM_[0-9]:%s$';", DatabasePrefix, EscapedUsername, auth, auth[8]);
+
+	#if defined DEBUG
+	LogToFile(logFile, "Updating admin username in DB: %s, Query: %s", auth, Query);
+	#endif
+
+    SQL_TQuery(DB, EmptyCallback, Query, _, DBPrio_Low);
 }
 
 public OnRebuildAdminCache(AdminCachePart:part)
@@ -2365,6 +2383,10 @@ public SMCResult:ReadConfig_KeyValue(Handle:smc, const String:key[], const Strin
 			{
 				g_PermabanFlags = ReadFlagString(value);
 			}
+			else if (strcmp("UpdateAdminNamesInDB", key, false) == 0)
+			{
+				g_bUpdateAdminNames = (value[0] != '0');
+			}
 		}
 
 		case ConfigStateReasons:
@@ -2926,5 +2948,10 @@ stock UTIL_IsHaveAccessToPermaban(iClient) {
 	// return (Get)
 	return (CheckCommandAccess(iClient, "sm_unban", ADMFLAG_UNBAN | ADMFLAG_ROOT)
 	    || CheckCommandAccess(iClient, "sb_permaban", g_PermabanFlags));
+}
+
+public EmptyCallback(Handle:hDB, Handle:hResultSet, const String:szError[], any:data) {
+	if (szError[0])
+		LogError("Database error: %s", szError);
 }
 //Yarr!
