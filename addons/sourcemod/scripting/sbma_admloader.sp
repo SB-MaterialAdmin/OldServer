@@ -47,12 +47,17 @@ public Plugin:myinfo = {
 #define GROUPS_BIT      3
 
 new g_iLoadBits = 0;
+new g_iReadBits = 0;
+
+public OnPluginStart() {
+  FileSystem_Init();
+}
 
 public OnRebuildAdminCache(AdminCachePart:ePart) {
   switch (ePart) {
-    case AdminCache_Overrides:  SET_BIT(g_iLoadBits, OVERRIDES_BIT);
-    case AdminCache_Groups:     SET_BIT(g_iLoadBits, GROUPS_BIT);
-    case AdminCache_Admins:     SET_BIT(g_iLoadBits, ADMINS_BIT);
+    case AdminCache_Overrides:  SET_BIT(g_iLoadBits, OVERRIDES_BIT),  SET_BIT(g_iReadBits, OVERRIDES_BIT);
+    case AdminCache_Groups:     SET_BIT(g_iLoadBits, GROUPS_BIT),     SET_BIT(g_iReadBits, GROUPS_BIT);
+    case AdminCache_Admins:     SET_BIT(g_iLoadBits, ADMINS_BIT),     SET_BIT(g_iReadBits, ADMINS_BIT);
   }
 
   new Handle:hDB = SourceBans_GetDB();
@@ -64,3 +69,97 @@ public OnRebuildAdminCache(AdminCachePart:ePart) {
 
 #include "admloader/filesystem.sp"
 #include "admloader/database.sp"
+
+ReadCache() {
+  if (CHECK_BIT(g_iReadBits, OVERRIDES_BIT))
+    ReadCache_Overrides();
+
+  if (CHECK_BIT(g_iReadBits, GROUPS_BIT))
+    ReadCache_Groups();
+
+  if (CHECK_BIT(g_iReadBits, ADMINS_BIT))
+    ReadCache_Admins();
+}
+
+#define SafeReadFileCell(%0,%1,%2,%3)   if (ReadFileCell(%0, %1, %2) < 0) { LogError(%3); FileSystem_Done(); return; }
+ReadCache_Overrides() {
+  if (!FileSystem_Open(false, OVERRIDES)) {
+    LogError("[FS] Can't read Overrides cache.");
+    FileSystem_Done();
+    return;
+  }
+
+  if (!FileSystem_Verify(OVERRIDES)) {
+    LogError("[FS] Invalid Overrides cache file.");
+    FileSystem_Done();
+    return;
+  }
+
+  new iOverridesCount;
+  new Handle:hFile = FileSystem();
+
+  if (ReadFileCell(hFile, iOverridesCount, 4) < 1) {
+    LogError("[FS] Can't read overrides count.");
+    FileSystem_Done();
+    return;
+  }
+
+  new iOverrideNameLength;
+  new String:szOverrideName[256];
+  new OverrideType:iOverrideType;
+  new iOverrideFlags;
+
+  for (new iOverrideID = 0; iOverrideID < iOverridesCount; ++iOverrideID) {
+    SafeReadFileCell(hFile, iOverrideNameLength, 4, "[FS] Can't read override name length.")
+    ReadFileString(hFile, szOverrideName, sizeof(szOverrideName), iOverrideNameLength);
+    SafeReadFileCell(hFile, iOverrideType, 1, "[FS] Can't read override type.")
+    SafeReadFileCell(hFile, iOverrideFlags, 4, "[FS] Can't read override flags.")
+
+    AddCommandOverride(szOverrideName, iOverrideType, iOverrideFlags);
+  }
+
+  FileSystem_Done();
+}
+
+/**
+ * About file structure:
+ *
+ * All files contains this:
+ * -> HEADER (SBMA)
+ * -> FILETYPE (0, 1, 2)
+ *
+ * Other content can be:
+ * -> ADMINS (type 0)
+ * ---> ADMIN_COUNT
+ * ---> ADMIN_ENTRIES
+ * -----> AID
+ * -----> NAME_LENGTH
+ * -----> NAME
+ * -----> IMMUNITY
+ * -----> FLAGS (bits)
+ * -----> GROUP_LENGTH
+ * -----> GROUP_NAME (if 0 - empty, and don't should be readen)
+ * -----> EXPIRES
+ *
+ * -> GROUPS (type 1)
+ * ---> GROUP_COUNT
+ * ---> GROUP_ENTRIES
+ * -----> NAME_LENGTH
+ * -----> NAME
+ * -----> IMMUNITY
+ * -----> FLAGS (bits)
+ * -----> OVERRIDES_COUNT
+ * -----> OVERRIDES_ENTRIES
+ * -------> NAME_LENGTH
+ * -------> NAME
+ * -------> OVERRIDE_TYPE (0, 1)
+ * -------> OVERRIDE_RULE (0, 1)
+ *
+ * -> OVERRIDES (type 2)
+ * ---> OVERRIDE_COUNT
+ * ---> OVERRIDE_ENTRIES
+ * -----> NAME_LENGTH
+ * -----> NAME
+ * -----> OVERRIDE_TYPE (0, 1)
+ * -----> FLAGS (bits)
+ */
