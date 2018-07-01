@@ -23,3 +23,44 @@
  */
 
 #include <sourcemod>
+#include <sourcebans>
+
+// We support oldest SourceMod versions, so... We don't use "newdecls" pragma.
+#pragma semicolon 1
+
+#define SET_BIT(%0,%1)    %0 |= (1 << %1)
+#define UNSET_BIT(%0,%1)  %0 &= ~(1 << %1)
+#define TOGGLE_BIT(%0,%1) %0 ^= (1 << %1)
+
+#define CHECK_BIT(%0,%1)  %0 & (1 << %1) == (1 << %1)
+
+public Plugin:myinfo = {
+  description = "Admin Loader for SB Material Admin",
+  version     = "1.0",
+  author      = "CrazyHackGUT aka Kruzya",
+  name        = "[SB MA] Admin Loader",
+  url         = "https://kruzya.me/go?token=54ea46fa5ef52f49d874228bcfac907b"
+};
+
+#define OVERRIDES_BIT   1
+#define ADMINS_BIT      2
+#define GROUPS_BIT      3
+
+new g_iLoadBits = 0;
+
+public OnRebuildAdminCache(AdminCachePart:ePart) {
+  switch (ePart) {
+    case AdminCache_Overrides:  SET_BIT(g_iLoadBits, OVERRIDES_BIT);
+    case AdminCache_Groups:     SET_BIT(g_iLoadBits, GROUPS_BIT);
+    case AdminCache_Admins:     SET_BIT(g_iLoadBits, ADMINS_BIT);
+  }
+
+  new Handle:hDB = SourceBans_GetDB();
+  if (hDB == INVALID_HANDLE)
+    ReadCache();
+  else
+    UpdateCache(hDB);
+}
+
+#include "admloader/filesystem.sp"
+#include "admloader/database.sp"
