@@ -2733,8 +2733,33 @@ stock bool:AdmHasFlag(admin)
 
 stock _:GetAdmImmunity(admin)
 {
-	return admin > 0 && GetUserAdmin(admin) != INVALID_ADMIN_ID ?
-	GetAdminImmunityLevel(GetUserAdmin(admin)) : 0;
+  if (admin < 1) {
+    return 0;
+  }
+
+  new AdminId:aid = GetUserAdmin(admin);
+  if (aid == INVALID_ADMIN_ID) {
+    return 0;
+  }
+
+  new iImmunity = GetAdminImmunityLevel(aid);
+  new iGroupCount = GetAdminGroupCount(aid);
+  if (iGroupCount > 0) {
+    new GroupId:gid;
+    new iGroupImmunity;
+    new String:szDummy[4]; // because GetAdminGroup.
+
+    for (new iGroupID; iGroupID < iGroupCount; iGroupID++) {
+      gid = GetAdminGroup(aid, iGroupID, szDummy, sizeof(szDummy));
+      iGroupImmunity = GetAdmGroupImmunityLevel(gid);
+
+      if (iGroupImmunity > iImmunity) {
+        iImmunity = iGroupImmunity;
+      }
+    }
+  }
+
+  return iImmunity;
 }
 
 stock _:GetClientUserId2(client)
