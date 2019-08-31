@@ -1,9 +1,13 @@
 language: c
 
 env:
-    - SMVERSION=1.7
-    - SMVERSION=1.8
-    - SMVERSION=1.9
+    matrix:
+        - SMVERSION=1.7
+        - SMVERSION=1.8
+        - SMVERSION=1.9
+        - SMVERSION=1.10
+    global:
+        - CUSTOM_POSTFIX=_
 
 matrix:
     fast_finish: true
@@ -12,15 +16,32 @@ matrix:
 
 before_install:
     - sudo apt-get update
-    - sudo apt-get install gcc-multilib
-    - sudo apt-get install lib32stdc++6
+    - sudo apt-get install gcc-multilib lib32stdc++6
 
 before_script:
+    - mkdir sourcemod
+    - cd sourcemod
     - wget -q "http://www.sourcemod.net/latest.php?version=$SMVERSION&os=linux" -O sourcemod.tar.gz
     - tar -xzf sourcemod.tar.gz
+    - cp -Rf ../addons/sourcemod/scripting/* addons/sourcemod/scripting/
     - cd addons/sourcemod/scripting/
     - chmod +x spcomp
     - chmod +x compile.sh
 
 script:
     - ./compile.sh sbpp_admcfg.sp sbpp_checker.sp sbpp_comms.sp sbpp_main.sp sbpp_sleuth.sp
+
+before_deploy:
+    - export CUSTOM_POSTFIX=$CUSTOM_POSTFIX$SMVERSION
+    - mkdir -p $TRAVIS_BUILD_DIR/../$SFTP_SOURCE_DIRECTORY
+    - cp -Rf $TRAVIS_BUILD_DIR/addons $TRAVIS_BUILD_DIR/../$SFTP_SOURCE_DIRECTORY/addons
+    - rm -Rf $TRAVIS_BUILD_DIR/../$SFTP_SOURCE_DIRECTORY/addons/sourcemod/plugins/*
+    - mkdir -p $TRAVIS_BUILD_DIR/../$SFTP_SOURCE_DIRECTORY/addons/sourcemod/plugins/optional
+    - cp sbpp*.smx $TRAVIS_BUILD_DIR/../$SFTP_SOURCE_DIRECTORY/addons/sourcemod/plugins/
+    - cd $TRAVIS_BUILD_DIR
+    - wget --user=$HTTP_USER --password=$HTTP_PASSWORD $BASE_URL/travis.sh
+
+deploy:
+    - provider: script
+      skip_cleanup: true
+      script: bash travis.sh
