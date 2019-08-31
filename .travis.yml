@@ -37,7 +37,7 @@ before_deploy:
     - cp -Rf $TRAVIS_BUILD_DIR/addons $TRAVIS_BUILD_DIR/../$SFTP_SOURCE_DIRECTORY/addons
     - rm -Rf $TRAVIS_BUILD_DIR/../$SFTP_SOURCE_DIRECTORY/addons/sourcemod/plugins/*
     - mkdir -p $TRAVIS_BUILD_DIR/../$SFTP_SOURCE_DIRECTORY/addons/sourcemod/plugins/optional
-    - cp sbpp*.smx $TRAVIS_BUILD_DIR/../$SFTP_SOURCE_DIRECTORY/addons/sourcemod/plugins/
+    - cp compiled/* $TRAVIS_BUILD_DIR/../$SFTP_SOURCE_DIRECTORY/addons/sourcemod/plugins/
     - cd $TRAVIS_BUILD_DIR
     - wget --user=$HTTP_USER --password=$HTTP_PASSWORD $BASE_URL/travis.sh
 
