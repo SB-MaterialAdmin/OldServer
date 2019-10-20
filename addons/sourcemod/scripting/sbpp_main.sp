@@ -2938,7 +2938,7 @@ stock AdminFlag:CreateFlagLetters()
 stock AccountForLateLoading()
 {
   decl String:auth[30];
-  for (new i = 1; i <= GetMaxClients(); i++)
+  for (new i = 1; i <= MaxClients; i++)
   {
     if (IsClientConnected(i) && !IsFakeClient(i))
     {
