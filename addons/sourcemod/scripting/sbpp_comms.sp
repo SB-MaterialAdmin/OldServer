@@ -1212,14 +1212,21 @@ public GotDatabase(Handle:owner, Handle:hndl, const String:error[], any:data)
 	}
 
 	// Set character set to UTF-8 in the database
+	char szCharset[8];
+#if SOURCEMOD_V_MINOR > 9
+	strcopy(szCharset, sizeof(szCharset), "utf8mb4");
+#else
+	strcopy(szCharset, sizeof(szCharset), "utf8");
+#endif
+
 	if (GetFeatureStatus(FeatureType_Native, "SQL_SetCharset") == FeatureStatus_Available)
 	{
-		SQL_SetCharset(g_hDatabase, "utf8");
+		SQL_SetCharset(g_hDatabase, szCharset);
 	}
 	else
 	{
 		decl String:query[128];
-		FormatEx(query, sizeof(query), "SET NAMES 'UTF8'");
+		FormatEx(query, sizeof(query), "SET NAMES '%s'", szCharset);
 		#if defined LOG_QUERIES
 		LogToFile(logQuery, "Set encoding. QUERY: %s", query);
 		#endif

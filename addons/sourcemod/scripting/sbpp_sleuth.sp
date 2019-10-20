@@ -114,6 +114,12 @@ public SQL_OnConnect(Handle:owner, Handle:hndl, const String:error[], any:data)
 	else
 	{
 		hDatabase = hndl;
+
+#if SOURCEMOD_V_MINOR > 9
+		SQL_SetCharset(hDatabase, "utf8mb4");
+#else
+		SQL_SetCharset(hDatabase, "utf8");
+#endif
 	}
 }
 

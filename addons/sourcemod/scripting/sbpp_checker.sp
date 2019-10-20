@@ -76,6 +76,12 @@ public OnDatabaseConnected(Handle:owner, Handle:hndl, const String:error[], any:
 		SetFailState("Failed to connect to SourceBans DB, %s", error);
 
 	g_DB = hndl;
+
+#if SOURCEMOD_V_MINOR > 9
+	SQL_SetCharset(g_DB, "utf8mb4");
+#else
+	SQL_SetCharset(g_DB, "utf8");
+#endif
 }
 
 public OnClientAuthorized(client, const String:auth[])

@@ -1120,7 +1120,12 @@ public GotDatabase(Handle:owner, Handle:hndl, const String:error[], any:data)
   DB = hndl;
 
   decl String:query[1024];
+
+#if SOURCEMOD_V_MINOR > 9
+  SQL_SetCharset(DB, "utf8mb4");
+#else
   SQL_SetCharset(DB, "utf8");
+#endif
 
   InsertServerInfo();
 
