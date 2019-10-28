@@ -181,4 +181,10 @@
 		"en"			"Select the ban type"
 		"ru"			"Выберите тип бана"
 	}
+
+	"SB_SelfBanIsDenied"
+	{
+		"en"			"You can't ban yourself!"
+		"ru"			"Вы не можете забанить себя!"
+	}
 }

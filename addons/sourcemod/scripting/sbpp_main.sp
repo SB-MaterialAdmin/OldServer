@@ -140,6 +140,8 @@ new serverID  = -1;
 new g_iCheckSID = 0;
 new g_PermabanFlags = 0;
 
+new bool:g_bSelfBan;
+
 new Handle:g_hFwd_OnBanAdded;
 
 new Handle:g_AdminsExpired = INVALID_HANDLE;
@@ -461,6 +463,12 @@ public Action:CommandBan(client, args)
   new target = FindTarget(client, buffer, true);
   if (target == -1)
   {
+    return Plugin_Handled;
+  }
+
+  if (target == client)
+  {
+    ReplyToCommand(client, "%s%t", Prefix, "SB_SelfBanIsDenied");
     return Plugin_Handled;
   }
 
@@ -1038,7 +1046,7 @@ stock DisplayBanTargetMenu(client)
   }
 
   for (new i = 1; i <= MaxClients; i++) {
-    if (iTarget == i || !IsClientConnected(i) || IsFakeClient(i) || !CanUserTarget(client, i)) {
+    if (iTarget == i || !IsClientConnected(i) || IsFakeClient(i) || !CanUserTarget(client, i) || (g_bSelfBan && i == client)) {
       continue;
     }
 
@@ -2407,6 +2415,10 @@ public SMCResult:ReadConfig_KeyValue(Handle:smc, const String:key[], const Strin
       else if (strcmp("UpdateAdminNamesInDB", key, false) == 0)
       {
         g_bUpdateAdminNames = (value[0] != '0');
+      }
+      else if (strcmp("SelfBan", key, false) == 0)
+      {
+        g_bSelfBan = (value[0] != '0');
       }
     }
 
