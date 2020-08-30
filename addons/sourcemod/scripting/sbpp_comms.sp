@@ -1479,9 +1479,9 @@ public Query_UnBlockSelect(Handle:owner, Handle:hndl, const String:error[], any:
 				// check result for possible combination with temp and time punishments (temp was skipped in code above)
 
 				#if SOURCEMOD_V_MAJOR >= 1 && SOURCEMOD_V_MINOR >= 8
-					SetPackPosition(data, view_as<DataPackPos>(16));
+					SetPackPosition(data, view_as<DataPackPos>(GetDataPackTypePosition()));
 				#else
-					SetPackPosition(data, 16);
+					SetPackPosition(data, GetDataPackTypePosition());
 				#endif
 
 				if (g_MuteType[target] > bNot)
@@ -3282,6 +3282,23 @@ stock bool:GetSID(iClient, String:szBuffer[], iLength) {
 #else
 	return GetClientAuthString(iClient, szBuffer, iLength);
 #endif
+}
+
+stock any:GetDataPackTypePosition()
+{
+	static iPosition = -1;
+	if (iPosition == -1)
+	{
+		new Handle:hPack = CreateDataPack();
+		WritePackCell(hPack, 0);
+		WritePackCell(hPack, 0);
+
+		// Always cast result to integer.
+		iPosition = _:GetPackPosition(hPack);
+		CloseHandle(hPack);
+	}
+
+	return iPosition;
 }
 
 //Yarr!
