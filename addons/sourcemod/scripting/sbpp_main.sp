@@ -1737,19 +1737,18 @@ public VerifyBan(Handle:owner, Handle:hndl, const String:error[], any:userid)
     decl String:Query[512];
     
     SQL_EscapeString(DB, clientName, Name, sizeof(Name));
+	new bid = SQL_FetchInt(hndl, 0);
     if (serverID == -1)
     {
       FormatEx(Query, sizeof(Query), "INSERT INTO %s_banlog (sid ,time ,name ,bid) VALUES  \
-        ((SELECT sid FROM %s_servers WHERE ip = '%s' AND port = '%s' LIMIT 0,1), UNIX_TIMESTAMP(), '%s', \
-        (SELECT bid FROM %s_bans WHERE ((type = 0 AND authid REGEXP '^STEAM_[0-9]:%s$') OR (type = 1 AND ip = '%s')) AND RemoveType IS NULL LIMIT 0,1))", 
-        DatabasePrefix, DatabasePrefix, ServerIp, ServerPort, Name, DatabasePrefix, clientAuth[8], clientIp);
+        ((SELECT sid FROM %s_servers WHERE ip = '%s' AND port = '%s' LIMIT 0,1), UNIX_TIMESTAMP(), '%s', %d)", 
+        DatabasePrefix, DatabasePrefix, ServerIp, ServerPort, Name, bid);
     }
     else
     {
       FormatEx(Query, sizeof(Query), "INSERT INTO %s_banlog (sid ,time ,name ,bid) VALUES  \
-        (%d, UNIX_TIMESTAMP(), '%s', \
-        (SELECT bid FROM %s_bans WHERE ((type = 0 AND authid REGEXP '^STEAM_[0-9]:%s$') OR (type = 1 AND ip = '%s')) AND RemoveType IS NULL LIMIT 0,1))", 
-        DatabasePrefix, serverID, Name, DatabasePrefix, clientAuth[8], clientIp);
+        (%d, UNIX_TIMESTAMP(), '%s', %d)", 
+        DatabasePrefix, serverID, Name, bid);
     }
     
     SQL_TQuery(DB, ErrorCheckCallback, Query, client, DBPrio_High);
