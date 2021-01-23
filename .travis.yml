@@ -39,7 +39,7 @@ before_deploy:
     - mkdir -p $TRAVIS_BUILD_DIR/../package/addons/sourcemod/plugins/optional
     - cp compiled/* $TRAVIS_BUILD_DIR/../package/addons/sourcemod/plugins/
     - cd $TRAVIS_BUILD_DIR
-    - tar -cvf ../${FILENAME} ./package
+    - tar -cvf ../${FILENAME} ./../package
 
 deploy:
     - provider: script
