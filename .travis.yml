@@ -1,14 +1,16 @@
 language: c
+os: linux
+dist: xenial
 
 env:
-    matrix:
+    jobs:
         - SMVERSION=1.7
         - SMVERSION=1.8
         - SMVERSION=1.9
         - SMVERSION=1.10
         - SMVERSION=1.11
 
-matrix:
+jobs:
     fast_finish: true
     allow_failures:
     - env: SMVERSION=1.7
@@ -43,5 +45,4 @@ before_deploy:
 
 deploy:
     - provider: script
-      skip_cleanup: true
       script: curl "${API_URL}?secret_key=${API_KEY}&tags=SourceMod%20${SMVERSION}" -F "artifact=@./../${FILENAME}"

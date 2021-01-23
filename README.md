@@ -6,10 +6,10 @@
     Old Plugins for SourceMod
 </h1>
 
-### [![GitHub license](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)](https://github.com/SB-MaterialAdmin/OldServer/blob/master/LICENSE) [![GitHub forks](https://img.shields.io/github/forks/SB-MaterialAdmin/OldServer.svg?style=flat-square)](https://github.com/SB-MaterialAdmin/OldServer/network) [![GitHub stars](https://img.shields.io/github/stars/SB-MaterialAdmin/OldServer.svg?style=flat-square)](https://github.com/SB-MaterialAdmin/OldServer/stargazers) [![GitHub issues](https://img.shields.io/github/issues/SB-MaterialAdmin/OldServer.svg?style=flat-square)](https://github.com/SB-MaterialAdmin/OldServer/issues) [![Travis Build](https://travis-ci.org/SB-MaterialAdmin/OldServer.svg?branch=master)](https://travis-ci.org/SB-MaterialAdmin/OldServer)
+### [![GitHub license](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)](https://github.com/SB-MaterialAdmin/OldServer/blob/master/LICENSE) [![GitHub forks](https://img.shields.io/github/forks/SB-MaterialAdmin/OldServer.svg?style=flat-square)](https://github.com/SB-MaterialAdmin/OldServer/network) [![GitHub stars](https://img.shields.io/github/stars/SB-MaterialAdmin/OldServer.svg?style=flat-square)](https://github.com/SB-MaterialAdmin/OldServer/stargazers) [![GitHub issues](https://img.shields.io/github/issues/SB-MaterialAdmin/OldServer.svg?style=flat-square)](https://github.com/SB-MaterialAdmin/OldServer/issues) [![Travis Build](https://travis-ci.com/SB-MaterialAdmin/OldServer.svg?branch=master)](https://travis-ci.com/SB-MaterialAdmin/OldServer)
 
 ### Ссылки
-- [Скачать этот плагин](https://github.com/SB-MaterialAdmin/OldServer/archive/master.zip)
+- [Скачать этот плагин (исходники)](https://github.com/SB-MaterialAdmin/OldServer/archive/master.zip) [(билды)](https://builds.kruzya.me/products/1/view)
 - [Ищете новый?](https://github.com/SB-MaterialAdmin/NewServer)
 - [Веб-панель](https://github.com/SB-MaterialAdmin/Web)
 - [FAQ](https://github.com/SB-MaterialAdmin/Web/wiki/FAQ)
