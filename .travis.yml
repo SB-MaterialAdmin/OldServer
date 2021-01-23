@@ -7,8 +7,6 @@ env:
         - SMVERSION=1.9
         - SMVERSION=1.10
         - SMVERSION=1.11
-    global:
-        - CUSTOM_POSTFIX=_
 
 matrix:
     fast_finish: true
@@ -34,16 +32,16 @@ script:
     - ./compile.sh sbpp_admcfg.sp sbpp_checker.sp sbpp_comms.sp sbpp_main.sp sbpp_sleuth.sp
 
 before_deploy:
-    - export CUSTOM_POSTFIX=$CUSTOM_POSTFIX$SMVERSION
-    - mkdir -p $TRAVIS_BUILD_DIR/../$SFTP_SOURCE_DIRECTORY
-    - cp -Rf $TRAVIS_BUILD_DIR/addons $TRAVIS_BUILD_DIR/../$SFTP_SOURCE_DIRECTORY/addons
-    - rm -Rf $TRAVIS_BUILD_DIR/../$SFTP_SOURCE_DIRECTORY/addons/sourcemod/plugins/*
-    - mkdir -p $TRAVIS_BUILD_DIR/../$SFTP_SOURCE_DIRECTORY/addons/sourcemod/plugins/optional
-    - cp compiled/* $TRAVIS_BUILD_DIR/../$SFTP_SOURCE_DIRECTORY/addons/sourcemod/plugins/
+    - export FILENAME=sbma-oldplugin.${TRAVIS_COMMIT:0:7}.${SMVERSION}.tar.gz
+    - mkdir -p $TRAVIS_BUILD_DIR/../package
+    - cp -Rf $TRAVIS_BUILD_DIR/addons $TRAVIS_BUILD_DIR/../package/addons
+    - rm -Rf $TRAVIS_BUILD_DIR/../package/addons/sourcemod/plugins/*
+    - mkdir -p $TRAVIS_BUILD_DIR/../package/addons/sourcemod/plugins/optional
+    - cp compiled/* $TRAVIS_BUILD_DIR/../package/addons/sourcemod/plugins/
     - cd $TRAVIS_BUILD_DIR
-    - tar -cvf ../sbma-oldplugin.${SMVERSION}.tar.gz .
+    - tar -cvf ../${FILENAME} ./package
 
 deploy:
     - provider: script
       skip_cleanup: true
-      script: curl "${API_URL}?secret_key=${API_KEY}&tags=SourceMod%20${SMVERSION}" -F "artifact=@./../sbma-oldplugin.${SMVERSION}.tar.gz"
+      script: curl "${API_URL}?secret_key=${API_KEY}&tags=SourceMod%20${SMVERSION}" -F "artifact=@./../${FILENAME}"
