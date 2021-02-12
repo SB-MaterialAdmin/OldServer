@@ -86,7 +86,6 @@ new bool:loadAdmins;
 new bool:loadGroups;
 new bool:loadOverrides;
 new curLoading = 0;
-new AdminFlag:g_FlagLetters[FLAG_LETTERS_SIZE];
 
 /* Admin KeyValues */
 new String:groupsLoc[128];
@@ -231,7 +230,6 @@ public OnPluginStart()
     AddMenuItem(BanTypeMenuHandle, "1", "IP", ITEMDRAW_DEFAULT);
   }
 
-  g_FlagLetters = CreateFlagLetters();
   g_AdminsExpired = CreateArray(2);
 
   BuildPath(Path_SM, logFile, sizeof(logFile), "logs/sourcebans.log");
@@ -1737,7 +1735,7 @@ public VerifyBan(Handle:owner, Handle:hndl, const String:error[], any:userid)
     decl String:Query[512];
     
     SQL_EscapeString(DB, clientName, Name, sizeof(Name));
-	new bid = SQL_FetchInt(hndl, 0);
+    new bid = SQL_FetchInt(hndl, 0);
     if (serverID == -1)
     {
       FormatEx(Query, sizeof(Query), "INSERT INTO %s_banlog (sid ,time ,name ,bid) VALUES  \
@@ -1929,15 +1927,13 @@ public AdminsDone(Handle:owner, Handle:hndl, const String:error[], any:data)
     if (strlen(password) > 0)
       SetAdminPassword(curAdm, password);
 
+    AdminFlag adminFlag;
     for (new i = 0; i < strlen(flags); ++i)
     {
-      if (flags[i] < 'a' || flags[i] > 'z')
+      if (!FindFlagByChar(flags[i], adminFlag))
         continue;
 
-      if (g_FlagLetters[flags[i]-'a'] < Admin_Reservation)
-        continue;
-
-      SetAdminFlag(curAdm, g_FlagLetters[flags[i]-'a'], true);
+      SetAdminFlag(curAdm, adminFlag, true);
     }
     ++admCount;
   }
@@ -2006,15 +2002,13 @@ public GroupsDone(Handle:owner, Handle:hndl, const String:error[], any:data)
       curGrp = FindAdmGroup(grpName);
     }
 
+    AdminFlag groupAdminFlag;
     for (new i = 0; i < strlen(grpFlags); ++i)
     {
-      if (grpFlags[i] < 'a' || grpFlags[i] > 'z')
+      if (!FindFlagByChar(grpFlags[i], groupAdminFlag))
         continue;
 
-      if (g_FlagLetters[grpFlags[i]-'a'] < Admin_Reservation)
-        continue;
-
-      SetAdmGroupAddFlag(curGrp, g_FlagLetters[grpFlags[i]-'a'], true);
+      SetAdmGroupAddFlag(curGrp, groupAdminFlag, true);
     }
 
     // Set the group immunity.
@@ -2915,35 +2909,6 @@ stock ParseBackupConfig_Overrides()
   }
   while (KvGotoNextKey(hKV));
   CloseHandle(hKV);
-}
-
-stock AdminFlag:CreateFlagLetters()
-{
-  new AdminFlag:FlagLetters[FLAG_LETTERS_SIZE];
-
-  FlagLetters['a'-'a'] = Admin_Reservation;
-  FlagLetters['b'-'a'] = Admin_Generic;
-  FlagLetters['c'-'a'] = Admin_Kick;
-  FlagLetters['d'-'a'] = Admin_Ban;
-  FlagLetters['e'-'a'] = Admin_Unban;
-  FlagLetters['f'-'a'] = Admin_Slay;
-  FlagLetters['g'-'a'] = Admin_Changemap;
-  FlagLetters['h'-'a'] = Admin_Convars;
-  FlagLetters['i'-'a'] = Admin_Config;
-  FlagLetters['j'-'a'] = Admin_Chat;
-  FlagLetters['k'-'a'] = Admin_Vote;
-  FlagLetters['l'-'a'] = Admin_Password;
-  FlagLetters['m'-'a'] = Admin_RCON;
-  FlagLetters['n'-'a'] = Admin_Cheats;
-  FlagLetters['o'-'a'] = Admin_Custom1;
-  FlagLetters['p'-'a'] = Admin_Custom2;
-  FlagLetters['q'-'a'] = Admin_Custom3;
-  FlagLetters['r'-'a'] = Admin_Custom4;
-  FlagLetters['s'-'a'] = Admin_Custom5;
-  FlagLetters['t'-'a'] = Admin_Custom6;
-  FlagLetters['z'-'a'] = Admin_Root;
-
-  return FlagLetters;
 }
 
 stock AccountForLateLoading()
